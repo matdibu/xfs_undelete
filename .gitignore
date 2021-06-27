@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+.ccls-cache
+bin
+.cache
+compile_commands.json
+*.plist

@@ -1,0 +1,48 @@
+#if 0
+#ifndef _XFS_INODE_ENTRY_HPP_
+#define _XFS_INODE_ENTRY_HPP_
+
+#include "linux_file.hpp"                                // utils::LinuxFile
+// #include "undelete_xfs/undelete_xfs_entry_interface.hpp" // uf::xfs::IInodeEntry
+#include "xfs_extent.hpp"                                // unpacked_extent_t
+#include "xfs_types.h"                                   // xfs_timestamp_t
+
+#include <cstdint> // uint8_t uint32_t uint64_t
+#include <fstream> // std::ifstream
+#include <vector>  // vector
+
+namespace uf {
+    namespace xfs {
+        class InodeEntry;
+    } // namespace xfs
+} // namespace uf
+
+class uf::xfs::InodeEntry : public uf::xfs::IInodeEntry
+{
+public:
+    InodeEntry(
+        const utils::LinuxFile& Disk,
+        const xfs_superblock_t& Superblock,
+        uint64_t                InodeNumber,
+        uint32_t                Blocksize,
+        std::vector<Extent>     Extents,
+        PanXfsMACTimes          MACTimes);
+
+    bool GetInodeNumber(uint64_t* InodeNumber) const noexcept final;
+    bool GetSize(uint64_t* Size) const noexcept final;
+    bool GetMACTimes(PanXfsMACTimes* MACTimes) const noexcept final;
+    bool GetNextAvailableOffset(uint64_t* Offset, uint64_t* Size) noexcept final;
+    bool GetFileContent(uint8_t* DestBuffer, uint64_t Offset, uint64_t Size, uint64_t* BytesRead) const noexcept final;
+
+private:
+    const utils::LinuxFile&             m_disk;
+    const xfs_superblock_t&             m_superblock;
+    const uint64_t                      m_inodeNumber;
+    const uint64_t                      m_blocksize;
+    const std::vector<Extent>           m_extents;
+    std::vector<Extent>::const_iterator m_iterator;
+    const PanXfsMACTimes                m_macTimes;
+};
+
+#endif // !_XFS_INODE_ENTRY_HPP_
+#endif
