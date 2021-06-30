@@ -1,0 +1,198 @@
+XFS Undelete
+
+Introduction
+
+The problem:
+Over-reliance on digitalization is imminent and dangerous.
+
+Motivation:
+Not every filesystem benefits from support for data recovery.
+XFS only mentions the possibility.
+
+Solution:
+Data recovery can mitigate some of the inevitable losses.
+
+Previous Research
+
+Several tools exist for
+- EXT3/EXT4
+- NTFS
+- many others
+
+There are a lot of scrubbing tools
+
+data scrubbing
+     =/=
+file recovery
+
+Scrubbing "carves" for data
+\
+File recovery intelligently reconstructs the files
+
+State of the Art
+
+EXT3/4
+The "old reliable" 
+
+ext2 -> ext3
+- a journal
+- online filesystem growth
+- HTree indexing for larger directories
+
+ext3:
+- Magicrescue
+- ext3grep
+- Testdisk
+- Ddrescue
+- Photorec
+- ext3undel
+
+ext3 -> ext4
+- uses extents
+- supports huge file/filesysem size
+- maximum filesystem size is 1EB
+ * 31250 times higher
+
+ext4:
+- extundelete
+- ext4magic
+- giis-ext4
+- Raise Data Recovery for ext4
+
+NTFS
+The Windows NT filesystem
+
+- has a journal, like ext3/4
+- uses clusters
+- has online self-healing
+
+ntfs:
+- chkdsk
+- Wondershare Recoverit
+- DiskInternals 
+
+Other XFS tools
+
+photorec
+- originally a data _scrubber_
+- uses the superblock
+- reads clusters
+- has a filetype database
+
+xfs_irecover
+- extract inods only
+- bitmaps are ignored
+
+xfsr
+- practically abandoned
+- only compatible with old version
+
+xfs_undelete (ianka)
+- tcl script
+- uses the inode B+trees
+
+Structure of the XFS filesystem
+
+One of the most used structures
+are the B+trees
+
+@b+tree.png
+
+it is also used by:
+- NTFS
+- EXT4
+- ReFS
+- BFS
+- APFS
+- ReiserFS
+- NSS
+- JFS
+
+Overview
+
+XFS consists of a standard UNIX filesystem interface
+
+Metadata integrity
+
+Using special fields and values,
+metadata can be error-checked and even repaired
+
+- Magic numbers
+- UUID copies
+- the owner
+- filesystem block number
+- log serial number
+- CRC32 checksum
+
+Theoretical Limits
+
+Inodes              2^63
+File System Size    8 EiB
+File Size           8 EiB
+Dir Size            32 GiB
+
+# TODO(dibux): more "xfs filesystem structure" ?
+
+My approach
+
+find deleted inodes in the [free] inode B+tree
+  validate and extract an extent list
+    reconstruct logical segments of the original file
+
+Allocation Groups
+
+The filesystem is split in several AG's
+They are almost separate filesystems
+
+@ag.png
+
+Inode block trees
+
+Inode B+tree
+- contains allocated inodes
+- free inodes can be extracted from partially
+  full inode chunks
+
+@inode_block_trees.png
+
+Free Inode B+tree
+- contains available unallocated inodes
+- allows for easy iteration through every possible inode
+
+Inode Blocks
+
+@inode_blocks.png
+
+Inodes are allocated in chunks of 64.
+An optional features allows for sparse inode allocation.
+  - this facilitates partially allocated inode blocks
+
+Inodes
+
+@inodes.png
+
+The inode structure itself is mostly wiped, but not entirely
+Timestamps are still valid
+Extent list/B+tree might be present
+
+Extents
+
+@extents.png
+
+Several checks are needed to improve garbage detection
+
+Demo
+
+Conclusions
+
+XFS file recovery can be done, and has a notably high success rate
+
+Further Work
+
+XFS is always evolving;
+this kind of tool needs continuous attention to maintain comptability
+
+There are unexplored structures within the filesystem 
+
+Thank you!
+
