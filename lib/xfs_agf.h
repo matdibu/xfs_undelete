@@ -13,9 +13,9 @@
 
 #include <linux/types.h>
 
-#define XFS_AGF_MAGIC 0x58414746 /* 'XAGF' */
+constexpr uint32_t XFS_AGF_MAGIC = 0x58414746; /* 'XAGF' */
 
-typedef enum
+using xfs_btnum_t = enum
 {
     XFS_BTNUM_BNOi,
     XFS_BTNUM_CNTi,
@@ -25,7 +25,7 @@ typedef enum
     XFS_BTNUM_FINOi,
     XFS_BTNUM_REFCi,
     XFS_BTNUM_MAX
-} xfs_btnum_t;
+};
 
 /*
  * Btree number 0 is bno, 1 is cnt, 2 is rmap. This value gives the size of
@@ -34,7 +34,7 @@ the
  */
 #define XFS_BTNUM_AGF (static_cast<int>(XFS_BTNUM_RMAPi + 1))
 
-typedef struct xfs_agf
+using xfs_agf_t = struct xfs_agf
 {
     /*
      * Common allocation group header information
@@ -77,6 +77,6 @@ typedef struct xfs_agf
     __be32 agf_spare2;
 
     /* structure must be padded to 64 bit alignment */
-} xfs_agf_t;
+};
 
 #endif // !_XFS_AGF_H_

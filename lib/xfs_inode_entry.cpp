@@ -1,8 +1,6 @@
-#if 0
-
 #include "xfs_inode_entry.hpp"
 
-#include "pandora_log.hpp"
+#include <spdlog/spdlog.h>
 
 using uf::xfs::Extent;
 using uf::xfs::InodeEntry;
@@ -44,7 +42,7 @@ bool InodeEntry::GetSize(uint64_t* const Size) const noexcept
     }
     catch (const std::exception& exc)
     {
-        PAN_LOG_ERROR("failed during GetSize: %s", exc.what())
+        spdlog::error("failed during GetSize: {}", exc.what());
         return false;
     }
 
@@ -75,7 +73,7 @@ bool InodeEntry::GetFileContent(uint8_t* const DestBuffer, uint64_t Offset, uint
     const noexcept
 {
     *BytesRead = 0;
-    for(const auto& extent : m_extents)
+    for (const auto& extent : m_extents)
     {
         // end of the current extent, as file offset
         uint64_t extentEndFileOffset = extent.GetFileOffset() + extent.GetBlockCount() * m_blocksize;
@@ -93,13 +91,14 @@ bool InodeEntry::GetFileContent(uint8_t* const DestBuffer, uint64_t Offset, uint
             // size we can and want to read
             // min of the requested size and the size of overlapping extent
             uint64_t targetSize = std::min(Size, extentEndFileOffset - Offset);
-            try {
+            try
+            {
                 // read whatever overlaps with the current extent
                 m_disk.ReadFromOffset(DestBuffer, targetOffset, targetSize);
             }
             catch (const utils::LinuxFileException& exc)
             {
-                PAN_LOG_ERROR("ReadFromOffset failed: %s", exc.what())
+                spdlog::error("ReadFromOffset failed: {}", exc.what());
                 return false;
             }
 
@@ -120,4 +119,3 @@ bool InodeEntry::GetFileContent(uint8_t* const DestBuffer, uint64_t Offset, uint
     return *BytesRead != 0; // partial reads are treated as successes
     // return false;           // partial reads are treated as errors
 }
-#endif

@@ -1,23 +1,19 @@
-#if 0
 #ifndef _XFS_INODE_ENTRY_HPP_
 #define _XFS_INODE_ENTRY_HPP_
 
-#include "linux_file.hpp"                                // utils::LinuxFile
-// #include "undelete_xfs/undelete_xfs_entry_interface.hpp" // uf::xfs::IInodeEntry
-#include "xfs_extent.hpp"                                // unpacked_extent_t
-#include "xfs_types.h"                                   // xfs_timestamp_t
+#include "linux_file.hpp" // utils::LinuxFile
+#include "xfs_extent.hpp" // unpacked_extent_t
+#include "xfs_types.h"    // xfs_timestamp_t
 
 #include <cstdint> // uint8_t uint32_t uint64_t
 #include <fstream> // std::ifstream
 #include <vector>  // vector
 
-namespace uf {
-    namespace xfs {
-        class InodeEntry;
-    } // namespace xfs
-} // namespace uf
+namespace uf::xfs {
+    class InodeEntry;
+} // namespace uf::xfs
 
-class uf::xfs::InodeEntry : public uf::xfs::IInodeEntry
+class uf::xfs::InodeEntry
 {
 public:
     InodeEntry(
@@ -28,11 +24,11 @@ public:
         std::vector<Extent>     Extents,
         PanXfsMACTimes          MACTimes);
 
-    bool GetInodeNumber(uint64_t* InodeNumber) const noexcept final;
-    bool GetSize(uint64_t* Size) const noexcept final;
-    bool GetMACTimes(PanXfsMACTimes* MACTimes) const noexcept final;
-    bool GetNextAvailableOffset(uint64_t* Offset, uint64_t* Size) noexcept final;
-    bool GetFileContent(uint8_t* DestBuffer, uint64_t Offset, uint64_t Size, uint64_t* BytesRead) const noexcept final;
+    bool GetInodeNumber(uint64_t* InodeNumber) const noexcept;
+    bool GetSize(uint64_t* Size) const noexcept;
+    bool GetMACTimes(PanXfsMACTimes* MACTimes) const noexcept;
+    bool GetNextAvailableOffset(uint64_t* Offset, uint64_t* Size) noexcept;
+    bool GetFileContent(uint8_t* DestBuffer, uint64_t Offset, uint64_t Size, uint64_t* BytesRead) const noexcept;
 
 private:
     const utils::LinuxFile&             m_disk;
@@ -45,4 +41,3 @@ private:
 };
 
 #endif // !_XFS_INODE_ENTRY_HPP_
-#endif

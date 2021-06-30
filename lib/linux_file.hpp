@@ -3,8 +3,8 @@
 
 #include "pandora_exceptions.hpp" // utils::ErrnoException
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace utils {
     class LinuxFile;

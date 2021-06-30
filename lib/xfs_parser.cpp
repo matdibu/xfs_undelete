@@ -1,12 +1,13 @@
 #include "xfs_parser.hpp"
 
-#include "pandora_log.hpp"     // PAN_LOG_*
 #include "xfs_agf.h"           // xfs_agf_t
 #include "xfs_agi.h"           // xfs_agi_t
 #include "xfs_inode_entry.hpp" // uf::xfs::IInodeEntry
 #include "xfs_tree.hpp"        // bplus_dump
 
 #include <sstream> // std::stringstream
+
+#include <spdlog/spdlog.h>
 
 using uf::xfs::Extent;
 using uf::xfs::IInodeCallback;
@@ -18,7 +19,7 @@ Parser::Parser(const std::string& DevicePath)
     : m_device(DevicePath)
     , m_superblock{}
 {
-    PAN_LOG_INFO("opened xfs partition \"%s\"", DevicePath.c_str())
+    spdlog::info("opened xfs partition \"{}\"", DevicePath.c_str());
     ReadSuperblock();
 }
 
@@ -54,15 +55,15 @@ void Parser::CheckSuperblockFlags() const
     case XFS_SB_VERSION_3:
     case XFS_SB_VERSION_4:
     case XFS_SB_VERSION_5:
-        log << superblockVersion << "\n";
+        log << superblockVersion;
         break;
     default:
-        PAN_LOG_ERROR("unknown superblock version: %hx\n", superblockVersion)
+        spdlog::error("unknown superblock version: {}x", superblockVersion);
         throw ValidationException("unkown superblock version");
     }
-    PAN_LOG_INFO("%s", log.str().c_str())
+    spdlog::info("{}", log.str().c_str());
 
-    PAN_LOG_INFO("superblock features:")
+    spdlog::info("superblock features:");
     std::stringstream versionflags;
     versionflags << "\tversion: ";
     if (HasVersionFeature(XFS_SB_VERSION_ATTRBIT))
@@ -121,7 +122,7 @@ void Parser::CheckSuperblockFlags() const
             versionflags << "ftype ";
     }
 
-    PAN_LOG_INFO("%s", versionflags.str().c_str())
+    spdlog::info("{}", versionflags.str().c_str());
 
     std::stringstream rocompat;
     rocompat << "\trocompat: ";
@@ -135,7 +136,7 @@ void Parser::CheckSuperblockFlags() const
     if (HasROCompatFeature(XFS_SB_FEAT_RO_COMPAT_REFLINK))
         rocompat << "reflink ";
 
-    PAN_LOG_INFO("%s", rocompat.str().c_str())
+    spdlog::info("{}", rocompat.str().c_str());
 
     std::stringstream incompat;
     incompat << "\tincompat: ";
@@ -148,7 +149,7 @@ void Parser::CheckSuperblockFlags() const
     if (HasIncompatFeature(XFS_SB_FEAT_INCOMPAT_META_UUID))
         incompat << "meta_uuid ";
 
-    PAN_LOG_INFO("%s", incompat.str().c_str())
+    spdlog::info("{}", incompat.str().c_str());
 }
 
 void Parser::ReadSuperblock()
@@ -301,11 +302,10 @@ bool Parser::InodeBTreeCallback(
         {
             try
             {
-                PAN_LOG_TRACE("[%u] attempting recovery", currentInode)
+                spdlog::trace("[{}] attempting recovery", currentInode);
 
                 Inode inode(ReadInode(AGIndex, currentInode, AGFRoot));
 
-#if 0
                 PanXfsMACTimes macTimes{};
                 macTimes.TimeModified = inode.GetMTime().t_sec;
                 macTimes.TimeAccessed = inode.GetATime().t_sec;
@@ -320,18 +320,15 @@ bool Parser::InodeBTreeCallback(
                     inode.GetExtents(),
                     macTimes);
 
-                if (!InodeCallback->operator()(&entry))
+                if (!InodeCallback(entry))
                 {
-                    PAN_LOG_ERROR("callback returned false")
+                    spdlog::error("callback returned false");
                     return false;
                 }
-#endif
-
-                PAN_LOG_INFO("[%u] recovered!", currentInode)
             }
             catch (const std::exception& ex)
             {
-                PAN_LOG_TRACE("[%u] failed: %s", currentInode, ex.what())
+                spdlog::trace("[{}] failed: {}", currentInode, ex.what());
             }
         }
 
@@ -389,9 +386,9 @@ bool Parser::DumpInodes(IInodeCallback* InodeCallback)
         // various information about the allocation group
         if (HasROCompatFeature(XFS_SB_FEAT_RO_COMPAT_FINOBT))
         {
-            PAN_LOG_INFO("dumping finobt in ag#%u", agIndex)
+            spdlog::info("dumping finobt in ag#{}", agIndex);
             // iterate through the free inode b+ tree
-            // std::cout << "traversing free inode b+ tree #" << ag_index << "\n";
+            // std::cout << "traversing free inode b+ tree #" << ag_index;
             BTreeWalk<xfs_inobt_ptr_t, xfs_inobt_rec_t>(
                 m_device,
                 m_superblock,
@@ -403,9 +400,9 @@ bool Parser::DumpInodes(IInodeCallback* InodeCallback)
         }
         else
         {
-            PAN_LOG_INFO("dumping inobt in ag#%u", agIndex)
+            spdlog::info("dumping inobt in ag#{}", agIndex);
             // iterate through the inode b+ tree
-            // std::cout << "traversing inode b+ tree #" << ag_index << "\n";
+            // std::cout << "traversing inode b+ tree #" << ag_index;
             BTreeWalk<xfs_inobt_ptr_t, xfs_inobt_rec_t>(
                 m_device,
                 m_superblock,
@@ -422,11 +419,11 @@ bool Parser::DumpInodes(IInodeCallback* InodeCallback)
 
 std::vector<Extent> Parser::OnlyWithinAGF(Extent Extent, const xfs_agnumber_t agIndex, const uint32_t agfRoot)
 {
-    PAN_LOG_TRACE(
-        "extracting free extents from (startblock:%lx fileoff:%lx blockcount:%lx)",
+    spdlog::trace(
+        "extracting free extents from (startblock:{}x fileoff:{}x blockcount:{}x)",
         Extent.GetStartBlock(),
         Extent.GetFileOffset(),
-        Extent.GetBlockCount())
+        Extent.GetBlockCount());
     std::vector<uf::xfs::Extent> result;
 
     xfs_agblock_t blocksPerAG = be32toh(m_superblock.sb_agblocks);
@@ -447,7 +444,7 @@ std::vector<Extent> Parser::OnlyWithinAGF(Extent Extent, const xfs_agnumber_t ag
 
     if (relativeExtent.GetStartBlock() > be32toh(agfHeader.agf_length))
     {
-        PAN_LOG_TRACE("extent's startblock is beyond the AG")
+        spdlog::trace("extent's startblock is beyond the AG");
         return result;
     }
 
@@ -625,14 +622,14 @@ after some simplications:
 
             else
             {
-                PAN_LOG_TRACE("found overlapping extent %lu->%lu", RecordBegin, RecordEnd)
+                spdlog::trace("found overlapping extent {}u->{}u", RecordBegin, RecordEnd);
 
                 uint64_t TargetBegin = std::max(RecordBegin, *ExtentBegin);
                 uint64_t TargetEnd   = std::min(RecordEnd, *ExtentEnd);
                 if (TargetBegin == TargetEnd)
                     return;
 
-                PAN_LOG_TRACE("added result of overlap (%lu->%lu) to valid extents", TargetBegin, TargetEnd)
+                spdlog::trace("added result of overlap ({}u->{}u) to valid extents", TargetBegin, TargetEnd);
 
                 class Extent toBeAdded(
                     static_cast<xfs_fileoff_t>(Extent.GetFileOffset() + TargetBegin - *ExtentBegin),
@@ -650,7 +647,7 @@ after some simplications:
                     return;
                 }
 
-                PAN_LOG_TRACE("continuing to search for extent %lu->%lu", *ExtentBegin, *ExtentEnd)
+                spdlog::trace("continuing to search for extent {}u->{}u", *ExtentBegin, *ExtentEnd);
             }
         }
     }

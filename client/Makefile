@@ -33,25 +33,24 @@ ifeq (${COMP_FLAGS},)
     endif
 endif
 
-COMP_FLAGS := ${COMP_FLAGS} -I../lib/
+CDEFINES2 = ${CDEFINES} -DSPDLOG_FMT_EXTERNAL -I.. -lpthread -lfmt -lspdlog -ldl -lasan -l:libspdlog.so -L$(OUTDIR) -l:lib_xfs_undelete.so
+# CDEFINES2 = ${CDEFINES}
 
-LINK_FLAGS := ${LINK_FLAGS} -lpthread -lfmt -lspdlog -ldl -l:libspdlog.so
-
-CDEFINES := ${CDEFINES} -DSPDLOG_FMT_EXTERNAL
+LINK_FLAGS := ${LINK_FLAGS} -lpthread -lfmt -lspdlog -ldl -l:libspdlog.so -lasan -L$(OUTDIR) -l:lib_xfs_undelete.so
 
 all: $(OBJECTS)
 	mkdir -p $(OUTDIR)
-	$(COMP) $(COMP_FLAGS) $(LINK_FLAGS) $(CDEFINES) $^ -o$(OUTDIR)/$(TARGET)
+	$(COMP) $(COMP_FLAGS) $(LINK_FLAGS) $(CDEFINES2) $^ -o$(OUTDIR)/$(TARGET)
 
 clean:
 	$(RM) $(OBJECTS) $(OUTDIR)/$(TARGET)
-	$(RM) -r $(OUTDIR)
+	# $(RM) -r $(OUTDIR)
 
 %.o: %.c
-	$(COMP) $(COMP_FLAGS) $(CDEFINES) -o "$@" -c $<
+	$(COMP) $(COMP_FLAGS) $(CDEFINES2) -o "$@" -c $<
 
 %.o: %.cpp
-	$(COMP) $(COMP_FLAGS) $(CDEFINES) -o "$@" -c $<
+	$(COMP) $(COMP_FLAGS) $(CDEFINES2) -o "$@" -c $<
 
 tidy:
 	/usr/share/clang/run-clang-tidy.py -header-filter=.* . > tidy.log

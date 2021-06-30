@@ -11,64 +11,62 @@
 #include <functional> // std::function
 #include <vector>     // std::vector
 
-namespace uf {
-    namespace xfs {
-        // callback for each record in the tree
-        template <typename btree_rec_t>
-        using BTreeRecordCallback =
-            std::function<void(const xfs_agnumber_t& ag_index, btree_rec_t rec, uint32_t agf_broot)>;
+namespace uf::xfs {
+    // callback for each record in the tree
+    template <typename btree_rec_t>
+    using BTreeRecordCallback =
+        std::function<void(const xfs_agnumber_t& ag_index, btree_rec_t rec, uint32_t agf_broot)>;
 
-        // main traversal function
-        template <typename btree_ptr_t, typename btree_rec_t>
-        void BTreeWalk(
-            const utils::LinuxFile&          Disk,
-            const xfs_superblock_t&          sb,
-            xfs_agnumber_t                   ag_index,
-            btree_ptr_t                      ptr,
-            uint32_t                         magic,
-            uint32_t                         agf_broot,
-            BTreeRecordCallback<btree_rec_t> callback);
+    // main traversal function
+    template <typename btree_ptr_t, typename btree_rec_t>
+    void BTreeWalk(
+        const utils::LinuxFile&          Disk,
+        const xfs_superblock_t&          sb,
+        xfs_agnumber_t                   ag_index,
+        btree_ptr_t                      ptr,
+        uint32_t                         magic,
+        uint32_t                         agf_broot,
+        BTreeRecordCallback<btree_rec_t> callback);
 
-        // get the tree length macro based on ptr size
-        template <typename btree_ptr_t>
-        constexpr off_t BTreeHeaderSize();
+    // get the tree length macro based on ptr size
+    template <typename btree_ptr_t>
+    constexpr off_t BTreeHeaderSize();
 
-        // This is the format of a standard b+tree node:
-        // +--------+---------+---------+---------+---------+
-        // | header |   key   | keys... |   ptr   | ptrs... |
-        // +--------+---------+---------+---------+---------+
-        //
-        // iterate through the pointers
-        template <typename btree_ptr_t, typename btree_rec_t>
-        void BTreeWalkPointers(
-            const utils::LinuxFile& Disk,
-            const xfs_superblock_t& sb,
-            xfs_agnumber_t          ag_index,
-            const struct xfs_btree_block& /*block*/,
-            off_t                            seek_offset,
-            uint32_t                         magic,
-            uint32_t                         agf_broot,
-            BTreeRecordCallback<btree_rec_t> callback);
+    // This is the format of a standard b+tree node:
+    // +--------+---------+---------+---------+---------+
+    // | header |   key   | keys... |   ptr   | ptrs... |
+    // +--------+---------+---------+---------+---------+
+    //
+    // iterate through the pointers
+    template <typename btree_ptr_t, typename btree_rec_t>
+    void BTreeWalkPointers(
+        const utils::LinuxFile& Disk,
+        const xfs_superblock_t& sb,
+        xfs_agnumber_t          ag_index,
+        const struct xfs_btree_block& /*block*/,
+        off_t                            seek_offset,
+        uint32_t                         magic,
+        uint32_t                         agf_broot,
+        BTreeRecordCallback<btree_rec_t> callback);
 
-        // leaf blocks of both types of b+trees have the same general format:
-        // a header describing the data in the block, and an array of records.
-        // +--------+------------+------------+
-        // | header |   record   | records... |
-        // +--------+------------+------------+
-        //
-        // iterate through the records
-        template <typename btree_ptr_t, typename btree_rec_t>
-        void BTreeWalkRecords(
-            const utils::LinuxFile& Disk,
-            const xfs_superblock_t& sb,
-            xfs_agnumber_t          ag_index,
-            const struct xfs_btree_block& /*block*/,
-            off_t                            seek_offset,
-            uint32_t                         agf_broot,
-            BTreeRecordCallback<btree_rec_t> callback);
+    // leaf blocks of both types of b+trees have the same general format:
+    // a header describing the data in the block, and an array of records.
+    // +--------+------------+------------+
+    // | header |   record   | records... |
+    // +--------+------------+------------+
+    //
+    // iterate through the records
+    template <typename btree_ptr_t, typename btree_rec_t>
+    void BTreeWalkRecords(
+        const utils::LinuxFile& Disk,
+        const xfs_superblock_t& sb,
+        xfs_agnumber_t          ag_index,
+        const struct xfs_btree_block& /*block*/,
+        off_t                            seek_offset,
+        uint32_t                         agf_broot,
+        BTreeRecordCallback<btree_rec_t> callback);
 
-    } // namespace xfs
-} // namespace uf
+} // namespace uf::xfs
 
 template <typename btree_ptr_t>
 constexpr off_t uf::xfs::BTreeHeaderSize()

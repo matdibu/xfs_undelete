@@ -12,11 +12,11 @@
 
 #include <linux/types.h>
 
-#define XFS_AGI_UNLINKED_BUCKETS 64
+constexpr uint64_t XFS_AGI_UNLINKED_BUCKETS = 64;
 
-#define XFS_AGI_MAGIC 0x58414749 /* 'XAGI' */
+constexpr uint64_t XFS_AGI_MAGIC = 0x58414749; /* 'XAGI' */
 
-typedef struct xfs_agi
+using xfs_agi_t = struct xfs_agi
 {
     /*
      * Common allocation group header information
@@ -53,6 +53,6 @@ typedef struct xfs_agi
     __be32 agi_free_level; /* levels in free inode btree */
 
     /* structure must be padded to 64 bit alignment */
-} xfs_agi_t;
+};
 
 #endif // !_XFS_AGI_H_

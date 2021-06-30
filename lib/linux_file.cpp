@@ -1,16 +1,16 @@
 #include "linux_file.hpp"
 
+#include <spdlog/spdlog.h>
+
+#include <aio.h>
+#include <fcntl.h>
 #include <linux/fs.h>  // FIGETBSZ
 #include <sys/ioctl.h> // ioctl
-#include <aio.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
 
-#include <string>
 #include <array>
-
-#include "pandora_log.hpp" // PAN_LOG_*
+#include <string>
 
 using utils::LinuxFile;
 using utils::LinuxFileException;
@@ -34,7 +34,7 @@ LinuxFile::LinuxFile(const std::string& Path, int Flags, mode_t Mode)
     if (-1 == (m_Descriptor = open(Path.c_str(), Flags, Mode)))
     {
         int err = errno;
-        PAN_LOG_ERROR("open \"%s\" failed: %s", Path.c_str(), strerror(err))
+        spdlog::error("open \"{}\" failed: {}", Path.c_str(), strerror(err));
         throw ErrnoException("open", err);
     }
 
@@ -45,7 +45,7 @@ LinuxFile::LinuxFile(const std::string& Path, int Flags, mode_t Mode)
     if (-1 == readlink(fdlink.c_str(), fullpath, sizeof(fullpath)))
     {
         int err = errno;
-        PAN_LOG_ERROR("readlink \"%s\" failed: %s", fdlink.c_str(), strerror(err))
+        spdlog::error("readlink \"{}\" failed: {}", fdlink.c_str(), strerror(err));
         throw ErrnoException("readlink", err);
     }
 
@@ -68,7 +68,7 @@ LinuxFile& LinuxFile::operator=(const LinuxFile& Other)
     {
         if (!Other.IsOpen())
         {
-            PAN_LOG_ERROR("File \"%s\"(%d) is not open", Other.GetFilePath().c_str(), Other.GetDescriptor())
+            spdlog::error("File \"{}\"({}) is not open", Other.GetFilePath().c_str(), Other.GetDescriptor());
             throw LinuxFileException("File is not open");
         }
 
@@ -78,11 +78,11 @@ LinuxFile& LinuxFile::operator=(const LinuxFile& Other)
         if (m_Descriptor < 0)
         {
             int err = errno;
-            PAN_LOG_ERROR(
-                "Failed to duplicate file \"%s\"(%d). Error: %s",
+            spdlog::error(
+                "Failed to duplicate file \"{}\"({}). Error: {}",
                 Other.GetFilePath().c_str(),
                 Other.GetDescriptor(),
-                strerror(err))
+                strerror(err));
             throw ErrnoException("Failed to duplicate file", err);
         }
 
@@ -117,7 +117,7 @@ LinuxFile::~LinuxFile() noexcept
     }
     catch (const std::exception& exc)
     {
-        PAN_LOG_ERROR("~LinuxFile failed: %s", exc.what())
+        spdlog::error("~LinuxFile failed: {}", exc.what());
     }
 }
 
@@ -127,7 +127,7 @@ size_t LinuxFile::ReadFromOffset(void* Buffer, off_t Offset, uint64_t Size) cons
     if (0 > (bytesRead = pread64(m_Descriptor, Buffer, Size, Offset)))
     {
         int err = errno;
-        PAN_LOG_ERROR("pread64 \"%s\"(%d) failed: %s", m_AbsolutePath.c_str(), m_Descriptor, strerror(err))
+        spdlog::error("pread64 \"{}\"({}) failed: {}", m_AbsolutePath.c_str(), m_Descriptor, strerror(err));
         throw LinuxFileException("Failed to read from file", err);
     }
     return static_cast<size_t>(bytesRead);
@@ -138,8 +138,8 @@ size_t LinuxFile::WriteAtOffset(const void* Buffer, off_t Offset, uint64_t Size)
     ssize_t bytesWritten = 0;
     if (0 > (bytesWritten = pwrite64(m_Descriptor, Buffer, Size, Offset)))
     {
-        //int err = errno;
-        //PAN_LOG_ERROR("pwrite64 \"%s\"(%d) failed: %s", m_AbsolutePath.c_str(), m_Descriptor, strerror(err))
+        // int err = errno;
+        // spdlog::error("pwrite64 \"{}\"({}) failed: {}", m_AbsolutePath.c_str(), m_Descriptor, strerror(err));
         throw LinuxFileException("Failed to write to file");
     }
     return static_cast<size_t>(bytesWritten);
@@ -150,7 +150,7 @@ void LinuxFile::Flush() const
     if (0 != fsync(m_Descriptor))
     {
         int err = errno;
-        PAN_LOG_ERROR("fsync \"%s\"(%d): %s", m_AbsolutePath.c_str(), m_Descriptor, strerror(err))
+        spdlog::error("fsync \"{}\"({}): {}", m_AbsolutePath.c_str(), m_Descriptor, strerror(err));
         throw ErrnoException("fsync", err);
     }
 }
@@ -166,7 +166,7 @@ ino_t LinuxFile::GetInode() const
     if (fstat(m_Descriptor, &file_stat) < 0)
     {
         int err = errno;
-        PAN_LOG_ERROR("fstat \"%s\"(%d) failed: %s", m_AbsolutePath.c_str(), m_Descriptor, strerror(err))
+        spdlog::error("fstat \"{}\"({}) failed: {}", m_AbsolutePath.c_str(), m_Descriptor, strerror(err));
         throw ErrnoException("fstat", err);
     }
 
@@ -182,7 +182,7 @@ void LinuxFile::Delete()
     if (0 != remove(path.c_str()))
     {
         int err = errno;
-        PAN_LOG_ERROR("remove \"%s\" failed: %s", path.c_str(), strerror(err))
+        spdlog::error("remove \"{}\" failed: {}", path.c_str(), strerror(err));
         throw ErrnoException("remove", err);
     }
 }
@@ -192,7 +192,7 @@ void LinuxFile::PreAllocate(off_t Offset, off_t Size) const
     int status = 0;
     if (0 != (status = posix_fallocate(m_Descriptor, Offset, Size)))
     {
-        PAN_LOG_ERROR("posix_fallocate: %s", strerror(status))
+        spdlog::error("posix_fallocate: {}", strerror(status));
         throw ErrnoException("posix_fallocate", status);
     }
 }
@@ -208,7 +208,7 @@ int LinuxFile::Ioctl(uint64_t Request) const
     if (-1 == (result = ioctl(m_Descriptor, Request)))
     {
         int err = errno;
-        PAN_LOG_ERROR("ioctl \"%s\"(%d) %lu failed: %s", m_AbsolutePath.c_str(), m_Descriptor, Request, strerror(err))
+        spdlog::error("ioctl \"{}\"({}) {}u failed: {}", m_AbsolutePath.c_str(), m_Descriptor, Request, strerror(err));
         throw ErrnoException("ioctl", err);
     }
     return result;
@@ -220,8 +220,8 @@ int LinuxFile::Ioctl(uint64_t Request, int Arg) const
     if (-1 == (result = ioctl(m_Descriptor, Request, Arg)))
     {
         int err = errno;
-        PAN_LOG_ERROR(
-            "ioctl \"%s\"(%d) %lu %d failed: %s", m_AbsolutePath.c_str(), m_Descriptor, Request, Arg, strerror(err))
+        spdlog::error(
+            "ioctl \"{}\"({}) {}u {} failed: {}", m_AbsolutePath.c_str(), m_Descriptor, Request, Arg, strerror(err));
         throw ErrnoException("ioctl", err);
     }
     return result;
@@ -233,8 +233,8 @@ int LinuxFile::Ioctl(uint64_t Request, void* Arg) const
     if (0 != (result = ioctl(m_Descriptor, Request, Arg)))
     {
         int err = errno;
-        PAN_LOG_ERROR(
-            "ioctl \"%s\"(%d) %lu %p failed: %s", m_AbsolutePath.c_str(), m_Descriptor, Request, Arg, strerror(err))
+        spdlog::error(
+            "ioctl \"{}\"({}) {}u {} failed: {}", m_AbsolutePath.c_str(), m_Descriptor, Request, Arg, strerror(err));
         throw ErrnoException("ioctl", err);
     }
     return result;
@@ -261,7 +261,7 @@ off_t LinuxFile::GetFileSize() const
     if (-1 == fstat(m_Descriptor, &stat))
     {
         int err = errno;
-        PAN_LOG_ERROR("fstat \"%s\"(%d) failed: %s", m_AbsolutePath.c_str(), m_Descriptor, strerror(err))
+        spdlog::error("fstat \"{}\"({}) failed: {}", m_AbsolutePath.c_str(), m_Descriptor, strerror(err));
         throw ErrnoException("fstat GetFileSize", err);
     }
 
@@ -275,7 +275,7 @@ time_t LinuxFile::GetMTime() const
     if (-1 == fstat(m_Descriptor, &stat))
     {
         int err = errno;
-        PAN_LOG_ERROR("fstat \"%s\"(%d) failed: %s", m_AbsolutePath.c_str(), m_Descriptor, strerror(err))
+        spdlog::error("fstat \"{}\"({}) failed: {}", m_AbsolutePath.c_str(), m_Descriptor, strerror(err));
         throw ErrnoException("fstat GetMTime", err);
     }
 
@@ -288,7 +288,7 @@ time_t LinuxFile::GetATime() const
     if (-1 == fstat(m_Descriptor, &stat))
     {
         int err = errno;
-        PAN_LOG_ERROR("fstat \"%s\"(%d) failed: %s", m_AbsolutePath.c_str(), m_Descriptor, strerror(err))
+        spdlog::error("fstat \"{}\"({}) failed: {}", m_AbsolutePath.c_str(), m_Descriptor, strerror(err));
         throw ErrnoException("fstat GetATime", err);
     }
 
@@ -301,7 +301,7 @@ time_t LinuxFile::GetCTime() const
     if (-1 == fstat(m_Descriptor, &stat))
     {
         int err = errno;
-        PAN_LOG_ERROR("fstat \"%s\"(%d) failed: %s", m_AbsolutePath.c_str(), m_Descriptor, strerror(err))
+        spdlog::error("fstat \"{}\"({}) failed: {}", m_AbsolutePath.c_str(), m_Descriptor, strerror(err));
         throw ErrnoException("fstat GetCTime", err);
     }
 

@@ -9,12 +9,10 @@
 
 #define XFS_DINODE_MAGIC 0x494e /* 'IN' */
 
-namespace uf {
-    namespace xfs {
-        struct xfs_inode;
-        class Inode;
-    } // namespace xfs
-} // namespace uf
+namespace uf::xfs {
+    struct xfs_inode;
+    class Inode;
+} // namespace uf::xfs
 
 /*
  * On-disk inode structure.
@@ -39,7 +37,8 @@ struct uf::xfs::xfs_inode
     __u8            di_format;    /* format of di_c data */
     __be16          di_onlink;    /* old number of links to file */
     __be32          di_uid;       /* owner's user id */
-    __be32          di_gid;       /* owner's group id */ __be32          di_nlink;     /* number of links to file */
+    __be32          di_gid;       /* owner's group id */
+    __be32          di_nlink;     /* number of links to file */
     __be16          di_projid_lo; /* lower part of owner's project id */
     __be16          di_projid_hi; /* higher part owner's project id */
     __u8            di_pad[6];    /* unused, zeroed space */
@@ -83,16 +82,16 @@ class uf::xfs::Inode
 public:
     explicit Inode(const xfs_inode& InodeHeader);
 
-    const std::vector<Extent>& GetExtents() const noexcept;
+    [[nodiscard]] const std::vector<Extent>& GetExtents() const noexcept;
 
     void SetExtents(std::vector<Extent> Extents) noexcept;
 
-    xfs_ino_t GetInodeNumber() const noexcept;
+    [[nodiscard]] xfs_ino_t GetInodeNumber() const noexcept;
 
-    xfs_timestamp_t GetATime() const noexcept;
-    xfs_timestamp_t GetMTime() const noexcept;
-    xfs_timestamp_t GetCTime() const noexcept;
-    xfs_timestamp_t GetCrTime() const noexcept;
+    [[nodiscard]] xfs_timestamp_t GetATime() const noexcept;
+    [[nodiscard]] xfs_timestamp_t GetMTime() const noexcept;
+    [[nodiscard]] xfs_timestamp_t GetCTime() const noexcept;
+    [[nodiscard]] xfs_timestamp_t GetCrTime() const noexcept;
 
 private:
     void Validate() const;

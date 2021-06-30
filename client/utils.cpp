@@ -35,10 +35,11 @@ void process_argv(int argc, char** argv)
         int                        option_index   = 0;
         const static struct option long_options[] = {
             {"device",  required_argument, nullptr, 'd'},
+            {"output",  required_argument, nullptr, 'o'},
             {"verbose", no_argument,       nullptr, 'v'},
             {nullptr,   0,                 nullptr,  0 }
         };
-        const static char optstring[] = "d:c";
+        const static char optstring[] = "d:o:v";
 
         c = getopt_long(argc, argv, optstring, long_options, &option_index);
         if (c == -1)
@@ -48,6 +49,10 @@ void process_argv(int argc, char** argv)
         {
         case 'd':
             g_opts.device = optarg;
+            break;
+
+        case 'o':
+            g_opts.output = optarg;
             break;
 
         case 'v':

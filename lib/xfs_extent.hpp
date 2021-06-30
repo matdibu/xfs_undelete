@@ -5,12 +5,10 @@
 
 #include <linux/types.h>
 
-namespace uf {
-    namespace xfs {
-        struct xfs_bmbt_rec_t;
-        class Extent;
-    } // namespace xfs
-} // namespace uf
+namespace uf::xfs {
+    struct xfs_bmbt_rec_t;
+    class Extent;
+} // namespace uf::xfs
 
 /*
  * XFS manages space using extents, which are defined as a starting location and length.
@@ -71,19 +69,21 @@ public:
     // ctor from packed big-endian disk struct
     explicit Extent(xfs_bmbt_rec_t DiskExtent) noexcept;
 
-    bool IsValid(const xfs_superblock_t& Superblock) const noexcept;
+    [[nodiscard]] bool IsValid(const xfs_superblock_t& Superblock) const noexcept;
 
-    uint64_t GetInputOffset(const xfs_superblock_t& Superblock) const noexcept;
+    [[nodiscard]] uint64_t GetInputOffset(const xfs_superblock_t& Superblock) const noexcept;
 
-    inline xfs_fileoff_t GetFileOffset() const noexcept
+    [[nodiscard]] inline xfs_fileoff_t GetFileOffset() const noexcept
     {
         return m_fileOffset;
     }
-    inline xfs_filblks_t GetBlockCount() const noexcept
+
+    [[nodiscard]] inline xfs_filblks_t GetBlockCount() const noexcept
     {
         return m_blockCount;
     }
-    inline xfs_fsblock_t GetStartBlock() const noexcept
+
+    [[nodiscard]] inline xfs_fsblock_t GetStartBlock() const noexcept
     {
         return m_blockOffset;
     }

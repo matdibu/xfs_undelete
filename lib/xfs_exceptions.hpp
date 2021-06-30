@@ -4,19 +4,17 @@
 #include <exception> // std::exception
 #include <string>    // std::string
 
-namespace uf {
-    namespace xfs {
-        // Validation inconsistencies
-        class ValidationException;
-    } // namespace xfs
-} // namespace uf
+namespace uf::xfs {
+    // Validation inconsistencies
+    class ValidationException;
+} // namespace uf::xfs
 
 class uf::xfs::ValidationException : public std::exception
 {
 public:
     explicit ValidationException(const char* Message);
     explicit ValidationException(std::string Message) noexcept;
-    const char* what() const noexcept override;
+    [[nodiscard]] const char* what() const noexcept override;
 
 private:
     const std::string m_message;

@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <linux/types.h>
+#include <ctime>
 
 typedef uint64_t xfs_fsblock_t;   /* blockno in filesystem (agno|agbno) */
 typedef uint64_t xfs_rfsblock_t;  /* blockno in filesystem (raw) */
@@ -33,30 +34,18 @@ les
 e
  * allocation in the event of severe free space fragmentation.
  */
-typedef struct xfs_inobt_rec
-{
-    __be32 ir_startino; /* starting inode number */
-    union
-    {
-        struct
-        {
-            __be32 ir_freecount; /* count of free inodes */
-        } f;
-        struct
+using xfs_inobt_rec_t = struct
         {
             __be16 ir_holemask;  /* hole mask for sparse chunks */
             __u8   ir_count;     /* total inode count */
             __u8   ir_freecount; /* count of free inodes */
-        } sp;
-    } ir_u;
-    __be64 ir_free; /* free inode mask */
-} xfs_inobt_rec_t;
+        };
 
-typedef struct xfs_timestamp
+using xfs_timestamp_t = struct xfs_timestamp
 {
     __be32 t_sec;  /* timestamp seconds */
     __be32 t_nsec; /* timestamp nanoseconds */
-} xfs_timestamp_t;
+};
 
 #define XFS_IOC_GETBMAP _IOWR('X', 38, struct getbmap)
 /*
@@ -140,7 +129,14 @@ struct xfs_bulkstat_req
 };
 #define XFS_BULKSTAT_REQ_SIZE(nr) (sizeof(struct xfs_bulkstat_req) + (nr) * sizeof(struct xfs_bulkstat))
 
-#define XFS_IOC_BULKSTAT         _IOR ('X', 127, struct xfs_bulkstat_req)
+#define XFS_IOC_BULKSTAT _IOR('X', 127, struct xfs_bulkstat_req)
 
+struct PanXfsMACTimes
+{
+    time_t TimeModified;
+    time_t TimeAccessed;
+    time_t TimeChanged;
+    time_t TimeCreated;
+};
 
 #endif // _XFS_TYPES_H_

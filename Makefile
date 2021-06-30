@@ -5,7 +5,7 @@ COMP ?= clang++
 CONFIG ?= debug
 TYPE ?= all
 
-CDEFINES =
+CDEFINES = -DSPDLOG_FMT_EXTERNAL
 CURRENT_DIR = $(shell pwd)
 
 ifeq ($(CONFIG),debug)
@@ -24,7 +24,7 @@ else
 	COMP_FLAGS := ${COMP_FLAGS} -m64
 endif
 
-COMP_FLAGS := ${COMP_FLAGS} -std=c++14 -fPIC
+COMP_FLAGS := ${COMP_FLAGS} -std=c++17 -fPIC
 
 ifeq ($(COMP),clang++)
 	COMP_FLAGS := ${COMP_FLAGS} -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-reserved-id-macro -Wno-weak-vtables

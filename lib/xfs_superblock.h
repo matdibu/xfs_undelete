@@ -17,11 +17,11 @@
  * Only the first of these is ever updated except during growfs.
  */
 #define XFS_SB_MAGIC               0x58465342 /* 'XFSB' */
-#define XFS_SB_VERSION_1           1u          /* 5.3, 6.0.1, 6.1 */
+#define XFS_SB_VERSION_1           1u         /* 5.3, 6.0.1, 6.1 */
 #define XFS_SB_VERSION_2           2u         /* 6.2 - attributes */
 #define XFS_SB_VERSION_3           3u         /* 6.2 - new inode version */
-#define XFS_SB_VERSION_4           4u          /* 6.2+ - bitmask version */
-#define XFS_SB_VERSION_5           5u          /* CRC enabled filesystem */
+#define XFS_SB_VERSION_4           4u         /* 6.2+ - bitmask version */
+#define XFS_SB_VERSION_5           5u         /* CRC enabled filesystem */
 #define XFS_SB_VERSION_NUMBITS     0x000fu
 #define XFS_SB_VERSION_ALLFBITS    0xfff0u
 #define XFS_SB_VERSION_ATTRBIT     0x0010u
@@ -63,7 +63,7 @@
 
 #define XFSLABEL_MAX 12u
 
-typedef struct xfs_superblock
+using xfs_superblock_t = struct xfs_superblock
 {
     uint32_t       sb_magicnum;            /* magic number == XFS_SB_MAGIC */
     uint32_t       sb_blocksize;           /* logical block size, bytes */
@@ -146,6 +146,6 @@ typedef struct xfs_superblock
     uuid_t    sb_meta_uuid; /* metadata file system unique id */
 
     /* must be padded to 64 bit alignment */
-} xfs_superblock_t;
+};
 
 #endif // !_XFS_SUPERBLOCK_H_

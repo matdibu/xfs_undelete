@@ -1,7 +1,10 @@
+#pragma once
+
 #include <string>
 
 struct xfs_opts {
     std::string device;
+    std::string output;
 };
 
 [[noreturn]] void die(const char* errstr, ...);
