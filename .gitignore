@@ -36,3 +36,4 @@ bin
 .cache
 compile_commands.json
 *.plist
+tests/recovered

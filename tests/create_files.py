@@ -8,8 +8,10 @@ if __name__ == '__main__':
     out_dir = 'xfs_test'
     for _ in range(100):
         file_name = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
-        file_text = 'this is the text for file ' + file_name
-        with open(file_name, 'w') as f:
+        file_path = out_dir + '/' + file_name
+        file_text = 'this is the text for file ' + file_name + '\n'
+        with open(file_path, 'w') as f:
             f.write(file_text)
+            print('created and wrote ' + file_path)
     sync()
 

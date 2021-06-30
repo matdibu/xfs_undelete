@@ -51,6 +51,7 @@ static bool save_file(uf::xfs::InodeEntry entry)
             size -= bytes_read;
             bytes_to_read = std::min(size, buffer_size);
             target.WriteAtOffset(buffer.data(), offset, bytes_read);
+            spdlog::debug("wrote {} bytes at offset {}", bytes_read, offset);
         }
     }
 
