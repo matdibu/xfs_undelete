@@ -34,14 +34,26 @@ les
 e
  * allocation in the event of severe free space fragmentation.
  */
-using xfs_inobt_rec_t = struct
+struct xfs_inobt_rec_t
+{
+    __be32 ir_startino; /* starting inode number */
+    union
+    {
+        struct
+        {
+            __be32 ir_freecount; /* count of free inodes */
+        } f;
+        struct
         {
             __be16 ir_holemask;  /* hole mask for sparse chunks */
             __u8   ir_count;     /* total inode count */
             __u8   ir_freecount; /* count of free inodes */
-        };
+        } sp;
+    } ir_u;
+    __be64 ir_free; /* free inode mask */
+};
 
-using xfs_timestamp_t = struct xfs_timestamp
+struct xfs_timestamp_t
 {
     __be32 t_sec;  /* timestamp seconds */
     __be32 t_nsec; /* timestamp nanoseconds */

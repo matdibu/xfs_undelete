@@ -82,7 +82,8 @@ using xfs_alloc_rec_t = struct xfs_alloc_rec
 {
     __be32 ar_startblock; /* starting block number */
     __be32 ar_blockcount; /* count of free blocks */
-}, xfs_alloc_key_t;
+};
+using xfs_alloc_key_t = xfs_alloc_rec_t;
 
 using xfs_alloc_rec_incore_t = struct xfs_alloc_rec_incore
 {
