@@ -1,5 +1,7 @@
 # Undelete XFS
 
+NOTE: This code was developed under certain strict circumstances and conditions. This is no longer the case, and now there are many improvements to be done :)
+
 ## Purpose
 
 This document will describe the general idea of the code, its incomplete features and any oddities.
