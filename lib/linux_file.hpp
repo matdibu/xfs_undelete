@@ -3,6 +3,7 @@
 
 #include "pandora_exceptions.hpp" // utils::ErrnoException
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

@@ -161,6 +161,9 @@ void Parser::ReadSuperblock()
         throw ValidationException("superblock magic");
     }
 
+    spdlog::info(
+        "sb.sb_blocksize={}, sb.sb_agblocks={}", be32toh(m_superblock.sb_blocksize), be32toh(m_superblock.sb_agblocks));
+
     CheckSuperblockFlags();
 }
 

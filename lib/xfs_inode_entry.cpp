@@ -32,10 +32,13 @@ bool InodeEntry::GetSize(uint64_t* const Size) const noexcept
 {
     uint64_t result = 0;
 
+    spdlog::info("get_file_size:");
+
     try
     {
         for (const auto& ex : m_extents)
         {
+            spdlog::info("\tget_file_size block count: {}", ex.GetBlockCount());
             result += ex.GetBlockCount() * m_blocksize;
         }
         *Size = result;

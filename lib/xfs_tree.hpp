@@ -11,6 +11,8 @@
 #include <functional> // std::function
 #include <vector>     // std::vector
 
+#include <spdlog/spdlog.h>
+
 namespace uf::xfs {
     // callback for each record in the tree
     template <typename btree_rec_t>
@@ -121,6 +123,8 @@ void uf::xfs::BTreeWalkRecords(
     // records.resize(be16toh(block.bb_numrecs));
     records.resize((be32toh(sb.sb_blocksize) - BTreeHeaderSize<btree_ptr_t>()) / sizeof(btree_rec_t));
 
+    spdlog::info("records.size()={}", records.size());
+
     // read the records into the vector
     Disk.ReadFromOffset(
         records.data(), seek_offset + BTreeHeaderSize<btree_ptr_t>(), records.size() * sizeof(btree_rec_t));
@@ -146,6 +150,8 @@ void uf::xfs::BTreeWalk(
     off_t                  seek_offset =
         static_cast<off_t>(be32toh(sb.sb_blocksize)) *
         static_cast<off_t>((be32toh(sb.sb_agblocks)) * static_cast<off_t>(ag_index) + static_cast<off_t>(ptr));
+
+    spdlog::info("BTreeWalk seek_offset={}", seek_offset);
 
     Disk.ReadFromOffset(&block, seek_offset, BTreeHeaderSize<btree_ptr_t>());
 
