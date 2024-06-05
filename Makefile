@@ -1,7 +1,7 @@
 TARGETS = lib client
 TARGETS_CLEAN = $(addsuffix .clean, $(TARGETS))
 ARCHV ?= $(shell getconf LONG_BIT)
-COMP ?= clang++
+COMP ?= g++
 CONFIG ?= debug
 TYPE ?= all
 
@@ -24,7 +24,15 @@ else
 	COMP_FLAGS := ${COMP_FLAGS} -m64
 endif
 
-COMP_FLAGS := ${COMP_FLAGS} -std=c++17 -fPIC
+FMT_PKG_CONFIG_PATH := "/nix/store/zc8xnz48ca61zjplxc3zz1ha3zss046p-fmt-10.2.1-dev/lib/pkgconfig"
+SPDLOG_PKG_CONFIG_PATH := "/nix/store/g80avs6dxaigm3k73f6dci5ihd94xmkl-spdlog-1.13.0-dev/lib/pkgconfig"
+PKGCONFIG_FLAGS := $(shell PKG_CONFIG_PATH=${FMT_PKG_CONFIG_PATH}:${SPDLOG_PKG_CONFIG_PATH} pkg-config --cflags --libs spdlog)
+
+COMP_FLAGS := \
+	${COMP_FLAGS} \
+	-std=c++17 \
+	-fPIC \
+	${PKGCONFIG_FLAGS}
 
 ifeq ($(COMP),clang++)
 	COMP_FLAGS := ${COMP_FLAGS} -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-reserved-id-macro -Wno-weak-vtables
