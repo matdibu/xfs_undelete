@@ -33,10 +33,9 @@ ifeq (${COMP_FLAGS},)
     endif
 endif
 
-CDEFINES2 = ${CDEFINES} -DSPDLOG_FMT_EXTERNAL -I.. -lpthread -lfmt -lspdlog -ldl -lasan -l:libspdlog.so -L$(OUTDIR) -l:lib_xfs_undelete.so
-# CDEFINES2 = ${CDEFINES}
+CDEFINES2 = ${CDEFINES} -DSPDLOG_FMT_EXTERNAL -I.. -lpthread -lfmt -lspdlog -ldl -l:libspdlog.so -L$(OUTDIR) -l:lib_xfs_undelete.so
 
-LINK_FLAGS := ${LINK_FLAGS} -lpthread -lfmt -lspdlog -ldl -l:libspdlog.so -lasan -L$(OUTDIR) -l:lib_xfs_undelete.so
+LINK_FLAGS := ${LINK_FLAGS} -lpthread -lfmt -lspdlog -ldl -l:libspdlog.so -L$(OUTDIR) -l:lib_xfs_undelete.so
 
 all: $(OBJECTS)
 	mkdir -p $(OUTDIR)
