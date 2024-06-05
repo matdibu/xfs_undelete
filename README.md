@@ -1,6 +1,11 @@
 # Undelete XFS
 
-NOTE: This code was developed under certain strict circumstances and conditions. This is no longer the case, and now there are many improvements to be done :)
+
+> [!IMPORTANT]
+> This project is now archived, and a rewrite in Zig can be found at https://codeberg.org/mateidibu/xfs_undelete
+
+> [!NOTE]
+> This code was developed under certain strict circumstances and conditions. This is no longer the case, and now there are many improvements to be done :)
 
 ## Purpose
 
