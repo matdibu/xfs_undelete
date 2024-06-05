@@ -11,7 +11,7 @@ OUTDIR = ../bin/$(ARCHV)/$(CONFIG)
 all : $(OBJECTS)
 	mkdir -p $(OUTDIR)
 	# $(COMP) $^ $(COMP_FLAGS) -shared -fvisibility=hidden -o $(OUTDIR)/$(TARGET)  -ldl -lasan
-	$(COMP) $^ $(COMP_FLAGS) -shared -o $(OUTDIR)/$(TARGET)  -ldl -lasan
+	$(COMP) $^ $(COMP_FLAGS) -shared -o $(OUTDIR)/$(TARGET) -ldl
 
 clean:
 	$(RM) $(OBJECTS)
