@@ -1,8 +1,9 @@
 #include "utils.hpp"
 
+#include <cstdarg>
+#include <cstdio>  /* printf */
+#include <cstdlib> /* exit */
 #include <getopt.h>
-#include <stdio.h>  /* printf */
-#include <stdlib.h> /* exit */
 
 #include <spdlog/spdlog.h>
 
@@ -23,7 +24,8 @@ xfs_opts g_opts = {};
 {
     die("usage: %s -d device\n"
         "       %s --device device\n",
-        prog_name, prog_name);
+        prog_name,
+        prog_name);
 }
 
 void process_argv(int argc, char** argv)
@@ -34,11 +36,10 @@ void process_argv(int argc, char** argv)
     {
         int                        option_index   = 0;
         const static struct option long_options[] = {
-            {"device",  required_argument, nullptr, 'd'},
-            {"output",  required_argument, nullptr, 'o'},
-            {"verbose", no_argument,       nullptr, 'v'},
-            {nullptr,   0,                 nullptr,  0 }
-        };
+            {"device", required_argument, nullptr, 'd'},
+            {"output", required_argument, nullptr, 'o'},
+            {"verbose", no_argument, nullptr, 'v'},
+            {nullptr, 0, nullptr, 0}};
         const static char optstring[] = "d:o:v";
 
         c = getopt_long(argc, argv, optstring, long_options, &option_index);
@@ -56,7 +57,7 @@ void process_argv(int argc, char** argv)
             break;
 
         case 'v':
-            spdlog::set_level(spdlog::level::debug);
+            spdlog::set_level(spdlog::level::trace);
             break;
 
         default:
@@ -64,19 +65,18 @@ void process_argv(int argc, char** argv)
         }
     }
 
-   if (optind < argc)
-   {
-       printf("unknown non-option ARGV-elements: ");
-       while (optind < argc)
-           printf("%s ", argv[optind++]);
-       printf("\n");
-       usage();
-   }
+    if (optind < argc)
+    {
+        printf("unknown non-option ARGV-elements: ");
+        while (optind < argc)
+            printf("%s ", argv[optind++]);
+        printf("\n");
+        usage();
+    }
 
-   if (g_opts.device.empty())
-   {
+    if (g_opts.device.empty())
+    {
         spdlog::error("no device given!");
         usage();
-   }
+    }
 }
-
