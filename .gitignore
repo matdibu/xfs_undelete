@@ -37,3 +37,6 @@ bin
 compile_commands.json
 *.plist
 tests/recovered
+
+build/
+clangtidy.log
